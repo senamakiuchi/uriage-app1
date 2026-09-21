@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>岡崎リアルグルメ＆聖地ナビ | OKAZAKI DEEP</title>
+    <style>
+        body { margin: 0; font-family: sans-serif; background: #0b0f19; color: #f1f5f9; padding-bottom: 60px; text-align: center; }
+        header { background: #0f172a; padding: 15px; border-bottom: 1px solid #1e293b; font-weight: bold; color: #38bdf8; font-size: 20px; }
+        .hero { padding: 40px 20px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-bottom: 1px solid #1e293b; }
+        .google-ads-box { max-width: 600px; margin: 20px auto; background: #141b2d; border: 1px dashed #38bdf8; padding: 15px; border-radius: 8px; color: #94a3b8; font-size: 14px; }
+        
+        /* 💡 【新デザイン】売上を入力するためのオシャレなWEBフォーム */
+        .form-container { max-width: 500px; margin: 30px auto; background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #334155; text-align: left; }
+        .form-title { font-size: 18px; color: #38bdf8; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 8px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 14px; color: #94a3b8; margin-bottom: 5px; }
+        .form-group input { width: 90%; padding: 10px; border-radius: 6px; border: 1px solid #475569; background: #334155; color: white; font-size: 16px; }
+        
+        .map-btn { display: inline-block; background: #38bdf8; color: #0f172a; padding: 10px 20px; border-radius: 6px; font-weight: bold; text-decoration: none; font-size: 14px; width: fit-content; text-align: center; cursor: pointer; border: none; }
+        .map-btn:hover { background: #7dd3fc; }
+    </style>
+</head>
+<body>
+
+    <header>📍 OKAZAKI DEEP (管理画面)</header>
+
+    <div class="hero">
+        <h1>📊 店舗売上・Discord送信システム</h1>
+        <p>スマホやWEBの画面から、本日のデータをDiscordへ一発送信！</p>
+    </div>
+
+    <!-- 💡 【ここが新パーツ！】売上と客数を入力する本物のWEBフォームです -->
+    <div class="form-container">
+        <div class="form-title">📋 本日の売上報告入力</div>
+        
+        <div class="form-group">
+            <label>今日の売上金額（円）</label>
+            <input type="number" id="web-uriage" placeholder="例: 180000">
+        </div>
+        
+        <div class="form-group">
+            <label>今日の来店客数（人）</label>
+            <input type="number" id="web-kyaku" placeholder="例: 100">
+        </div>
+        
+        <button class="map-btn" onclick="sendToDiscord()">🚀 Discordへ売上を報告する</button>
+    </div>
+
+    <script>
+        // 💡 【超強力なWEB連携機能】ボタンを押したときに動くJavaScript
+        function sendToDiscord() {
+            // 1. 画面に入力された「売上」と「客数」の数字を瞬時に読み取る
+            let uriage = parseInt(document.getElementById("web-uriage").value);
+            let kyaku = parseInt(document.getElementById("web-kyaku").value);
+            
+            if (isNaN(uriage) || isNaN(kyaku)) {
+                alert("売上と客数を両方とも数字で入力してね！");
+                return;
+            }
+
+            // 2. 画面の裏側で、客単価とグラフ（★）を一瞬で計算しちゃう！
+            let tanka = Math.floor(uriage / kyaku);
+            let stars = "■".repeat(Math.floor(uriage / 10000));
+            
+            // 3. AIアドバイスもWEBのプログラム側で爆速自動生成！
+            let aiAdvice = "";
+            if (tanka < 1500) {
+                aiAdvice = "【AI分析】現在、客単価が少し低めです。あと200円上げるために、サイドメニューのセット提案やトッピングの追加をお客様に全力でお勧めしましょう！";
+            } else {
+                aiAdvice = "【AI分析】素晴らしい売上バランスです！この調子を維持しつつ、リピーターを増やすために次回使える割引クーポンの案内を強化しましょう！";
+            }
+
+            // 4. Discordに届くメッセージの形に綺麗にパッキング！
+            let message = `\n【📢 WEB画面からの売上速報 】\n━━━━━━━━━━━━━━━━━━━━\n📅 送信日時：${new Date().toLocaleDateString()}\n💰 売上金額：${uriage.toLocaleString()}円\n👥 来店客数：${kyaku}人\n🎯 客単価　：${tanka.toLocaleString()}円\n📈 グラフ　：📊 ${stars}\n🤖 AI助言　：${aiAdvice}\n━━━━━━━━━━━━━━━━━━━━\nWEB画面からのテスト大成功！今日もお仕事頑張りましょう！`;
+
+            // 💻 【最重要】あなたのDiscordのWebhook URLをここにそのまま貼り付けてください！
+            // ⚠️ 貼り付けるときは、前後のダブルクォーテーション（ " " ）を消さないように注意してね！
+            let webhookUrl = "https://discord.com/api/webhooks/1551676045495631892/Tl8plY9cre2lnI5x7HZY-7v9j1TArRl3PIwnUJydY3A61LxTiY8FF3YUgJXxW78V5Anf";
+
+            // 5. 【究極の通信魔法】Pythonを使わずに、WEB画面から直接Discordのサーバーへデータをぶっ飛ばす！
+            fetch(webhookUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content: message })
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert("🎉 送信大成功！！！\nあなたのDiscordへ売上レポートを爆速で送信しました！");
+                    // 次の入力のために画面を空っぽにお掃除する
+                    document.getElementById("web-uriage").value = "";
+                    document.getElementById("web-kyaku").value = "";
+                } else {
+                    alert("送信失敗。DiscordのURLが間違っている可能性があります。");
+                }
+            })
+            .catch(error => alert("エラーが発生しました: " + error));
+        }
+    </script>
+</body>
+</html>
+
