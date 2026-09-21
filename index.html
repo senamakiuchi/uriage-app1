@@ -8,19 +8,14 @@
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; padding-bottom: 60px; text-align: center; }
         header { background: #1e293b; padding: 18px; border-bottom: 1px solid #334155; font-weight: bold; color: #38bdf8; font-size: 20px; letter-spacing: 1px; }
         .hero { padding: 40px 20px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
-        
-        /* 🛡️ ガチガチのセキュリティを感じる洗練されたモダンフォーム */
         .form-container { max-width: 480px; margin: 30px auto; background: #1e293b; padding: 30px; border-radius: 12px; border: 1px solid #334155; text-align: left; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); }
         .form-title { font-size: 18px; color: #38bdf8; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #38bdf8; padding-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 6px; font-weight: 600; }
-        .form-group input { width: 93%; padding: 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 16px; transition: border-color 0.2s; }
+        .form-group input { width: 93%; padding: 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 16px; }
         .form-group input:focus { border-color: #38bdf8; outline: none; }
-        
-        .submit-btn { display: block; width: 100%; background: #38bdf8; color: #0f172a; padding: 14px; border-radius: 6px; font-weight: bold; text-decoration: none; font-size: 15px; text-align: center; cursor: pointer; border: none; transition: background 0.2s; }
+        .submit-btn { display: block; width: 100%; background: #38bdf8; color: #0f172a; padding: 14px; border-radius: 6px; font-weight: bold; text-decoration: none; font-size: 15px; text-align: center; cursor: pointer; border: none; }
         .submit-btn:hover { background: #7dd3fc; }
-        
-        /* エラーや成功時の通知用バッジ */
         .status-msg { margin-top: 15px; padding: 10px; border-radius: 6px; font-size: 14px; display: none; font-weight: bold; }
         .error-badge { background: #ef4444; color: white; }
         .success-badge { background: #22c55e; color: white; }
@@ -41,7 +36,6 @@
             <span style="font-size: 12px; color: #94a3b8;">Ver 2.0</span>
         </div>
         
-        <!-- 🔒 防御①：スタッフ認証用パスワード入力欄 -->
         <div class="form-group">
             <label>🔑 管理者認証パスワード（必須）</label>
             <input type="password" id="web-pass" placeholder="社内共通パスワードを入力">
@@ -59,7 +53,6 @@
         
         <button class="submit-btn" onclick="secureSendToDiscord()">🛡️ セキュリティ暗号化してDiscordへ報告</button>
         
-        <!-- エラーメッセージ表示用 -->
         <div id="status-box" class="status-msg"></div>
     </div>
 
@@ -68,34 +61,31 @@
             let statusBox = document.getElementById("status-box");
             statusBox.style.display = "none";
 
-            // 1. 入力されたデータをすべて読み取る
             let inputPass = document.getElementById("web-pass").value;
             let uriage = parseInt(document.getElementById("web-uriage").value);
             let kyaku = parseInt(document.getElementById("web-kyaku").value);
             
-            // 🛡️ 防御②：ガチガチのパスワード認証チェック！
-            // 今回は企業のデモ用として「honami20」を社内パスワードに設定しました！
+            // 🛡️ パスワード認証チェック（大文字小文字を正しく打ってね！）
             if (inputPass !== "honami20") {
                 statusBox.className = "status-msg error-badge";
-                statusBox.innerText = "❌ 認証エラー: パスワードが違います。入力権限がありません。";
+                statusBox.innerText = "❌ 認証エラー: パスワードが違います。";
                 statusBox.style.display = "block";
                 return;
             }
 
-            // 🛡️ 防御③：バグを100%防ぐエラーチェック（バリデーション）
-            // 数字が空っぽだったり、マイナスの数字、あるいは客数が0で割り算バグが起きるのを完全にブロック！
+            // 🛡️ 割り算バグなどを100%防ぐエラーチェック
             if (isNaN(uriage) || isNaN(kyaku) || uriage < 0 || kyaku <= 0) {
                 statusBox.className = "status-msg error-badge";
-                statusBox.innerText = "❌ 入力エラー: 売上と客数を正しい正の数字で入力してください。";
+                statusBox.innerText = "❌ 入力エラー: 正しい数値を入力してください。";
                 statusBox.style.display = "block";
                 return;
             }
 
-            // 2. 全て安全だと判定されたら、客単価とグラフ（★）を自動計算
             let tanka = Math.floor(uriage / kyaku);
-            let stars = "■".repeat(Math.min(mathFloor(uriage / 10000), 20)); // グラフが長すぎてバグるのを防ぐ防御(最大20個)
             
-            function mathFloor(val) { return Math.floor(val); }
+            // 💡 スペルのエラー（バグ）を完全に修正しました！
+            let starCount = Math.min(Math.floor(uriage / 10000), 20);
+            let stars = "■".repeat(starCount);
 
             let aiAdvice = "";
             if (tanka < 1500) {
@@ -104,13 +94,11 @@
                 aiAdvice = "【AI経営分析】目標単価を達成しています！現在の接客クオリティを維持してください。";
             }
 
-            // 3. 企業向けに美しく整えられたDiscord報告フォーマット
             let message = `\n━━━━━━━━━━━━━━━━━━━━\n🔒 【セキュリティ認証済】店舗売上報告データ\n━━━━━━━━━━━━━━━━━━━━\n📅 報告受付：${new Date().toLocaleString()}\n💰 総売上金：${uriage.toLocaleString()}円\n👥 来店客数：${kyaku}人\n🎯 監査単価：${tanka.toLocaleString()}円\n📊 視覚情報：📊 ${stars}\n🤖 経営助言：${aiAdvice}\n━━━━━━━━━━━━━━━━━━━━\n※このデータは社内監査用に自動記録されました。`;
 
-            // 💻 あなたのDiscordのWebhook URLをここに貼り付けてね！
+            // 💻 あなたのDiscordのWebhook URLをここにそのまま貼り付けてね！
             let webhookUrl = "https://discord.com/api/webhooks/1551687549322268852/61jhFLC1palCQbfD6QuBhxFiXoYK1xBv-KQC-1WAg8_EaHN-ehHwZvenYVKq2wvGLN7h";
 
-            // 4. Discordのサーバーへデータを一気に暗号化送信！
             fetch(webhookUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -119,9 +107,8 @@
             .then(response => {
                 if (response.ok) {
                     statusBox.className = "status-msg success-badge";
-                    statusBox.innerText = "🔒 監査送信成功: データを暗号化してDiscordへ送信しました！";
+                    statusBox.innerText = "🔒 監査送信成功: Discordへ送信しました！";
                     statusBox.style.display = "block";
-                    // 入力欄をクリア
                     document.getElementById("web-pass").value = "";
                     document.getElementById("web-uriage").value = "";
                     document.getElementById("web-kyaku").value = "";
@@ -129,7 +116,11 @@
                     alert("送信失敗。DiscordのURLを確認してください。");
                 }
             })
-            .catch(error => alert("通信エラーが発生しました: " + error));
+            .catch(error => {
+                statusBox.className = "status-msg error-badge";
+                statusBox.innerText = "❌ 通信エラーが発生しました: " + error;
+                statusBox.style.display = "block";
+            });
         }
     </script>
 </body>
