@@ -108,7 +108,7 @@
             let message = `\n━━━━━━━━━━━━━━━━━━━━\n🔒 【セキュリティ認証済】店舗売上報告データ\n━━━━━━━━━━━━━━━━━━━━\n📅 報告受付：${new Date().toLocaleString()}\n💰 総売上金：${uriage.toLocaleString()}円\n👥 来店客数：${kyaku}人\n🎯 監査単価：${tanka.toLocaleString()}円\n📊 視覚情報：📊 ${stars}\n🤖 経営助言：${aiAdvice}\n━━━━━━━━━━━━━━━━━━━━\n※このデータは社内監査用に自動記録されました。`;
 
             // 💻 あなたのDiscordのWebhook URLをここに貼り付けてね！
-            let webhookUrl = "https://discord.com";
+            let webhookUrl = "https://discord.com/api/webhooks/1551687549322268852/61jhFLC1palCQbfD6QuBhxFiXoYK1xBv-KQC-1WAg8_EaHN-ehHwZvenYVKq2wvGLN7h";
 
             // 4. Discordのサーバーへデータを一気に暗号化送信！
             fetch(webhookUrl, {
