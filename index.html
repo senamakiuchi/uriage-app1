@@ -3,153 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>【利益監査】店舗利益・人件費アナリティクスシステム</title>
+    <title>【究極経営】店舗売上・全自動利益アナリティクス</title>
+    
+    <!-- 💡 【作戦A】スマホのホーム画面に本物のアプリとして登録できるようにする魔法の目印 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="売上くんAI">
+    
     <style>
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b0f19; color: #f8fafc; padding-bottom: 60px; text-align: center; }
         header { background: #1e293b; padding: 18px; border-bottom: 1px solid #334155; font-weight: bold; color: #38bdf8; font-size: 20px; letter-spacing: 1px; }
-        .hero { padding: 40px 20px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
-        .form-container { max-width: 480px; margin: 30px auto; background: #1e293b; padding: 30px; border-radius: 12px; border: 1px solid #334155; text-align: left; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); }
-        .form-title { font-size: 18px; color: #38bdf8; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #38bdf8; padding-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
-        .form-group { margin-bottom: 20px; }
+        .hero { padding: 30px 20px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
+        .form-container, .view-container { max-width: 480px; margin: 20px auto; background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #334155; text-align: left; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); }
+        .form-title { font-size: 18px; color: #38bdf8; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #38bdf8; padding-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+        .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 6px; font-weight: 600; }
         .form-group input { width: 93%; padding: 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 16px; }
-        .form-group input:focus { border-color: #38bdf8; outline: none; }
-        .submit-btn { display: block; width: 100%; background: #38bdf8; color: #0f172a; padding: 14px; border-radius: 6px; font-weight: bold; text-decoration: none; font-size: 15px; text-align: center; cursor: pointer; border: none; }
+        .submit-btn { display: block; width: 100%; background: #38bdf8; color: #0f172a; padding: 14px; border-radius: 6px; font-weight: bold; font-size: 15px; text-align: center; cursor: pointer; border: none; }
         .submit-btn:hover { background: #7dd3fc; }
         .status-msg { margin-top: 15px; padding: 10px; border-radius: 6px; font-size: 14px; display: none; font-weight: bold; }
         .error-badge { background: #ef4444; color: white; }
         .success-badge { background: #22c55e; color: white; }
+        
+        /* 💡 WEB上可視化用のオシャレなデータ表・リストデザイン */
+        .history-item { background: #0f172a; padding: 15px; border-radius: 8px; margin-top: 10px; border: 1px solid #334155; border-left: 5px solid #38bdf8; }
+        .history-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px; color: #94a3b8; margin-top: 8px; }
+        .history-profit { font-size: 16px; font-weight: bold; color: #22c55e; }
     </style>
 </head>
 <body>
 
-    <header>🛡️ ENTERPRISE PROFIT AUDIT SYSTEM</header>
+    <header>🛡️ ENTERPRISE ANALYTICS Ver 5.0</header>
 
     <div class="hero">
-        <h1>📊 本格社内用：当日利益・人件費監査フォーム</h1>
-        <p>※売上と総労働時間を入力するだけで、人件費・原価を引き算し、手元に残る【純利益】をAIがガチ分析します。</p>
+        <h1>📊 次世代型：店舗売上利益・ダッシュボード</h1>
+        <p>※ブラウザ内に過去データを自動保存し、WEBとDiscordで完全可視化します。</p>
     </div>
 
+    <!-- 📥 入力エリア -->
     <div class="form-container">
-        <div class="form-title">
-            <span>📝 本日の収支監査入力</span>
-            <span style="font-size: 12px; color: #94a3b8;">Ver 4.0</span>
-        </div>
+        <div class="form-title"><span>📝 本日の収支監査入力</span></div>
+        <div class="form-group"><label>🔑 管理者認証パスワード</label><input type="password" id="web-pass" placeholder="honami20"></div>
+        <div class="form-group"><label>📅 報告対象の日付（当日以外も選べます）</label><input type="date" id="web-date"></div>
+        <div class="form-group"><label>💰 今日の総売上金額（円）</label><input type="number" id="web-today" placeholder="例: 180000"></div>
+        <div class="form-group"><label>⏳ 今日の全スタッフ総労働時間（時間）</label><input type="number" id="web-hours" placeholder="例: 25"></div>
+        <div class="form-group"><label>🍜 お店の想定原価率（％）</label><input type="number" id="web-cost-rate" value="35"></div>
         
-        <!-- パスワード機能 -->
-        <div class="form-group">
-            <label>🔑 管理者認証パスワード（必須）</label>
-            <input type="password" id="web-pass" placeholder="社内共通パスワードを入力">
-        </div>
-
-        <!-- 💡 利益を一発計算するための3つのリアル入力欄 -->
-        <div class="form-group">
-            <label>💰 1. 本日の総売上金額（円）</label>
-            <input type="number" id="web-today" placeholder="例: 180000">
-        </div>
-        
-        <div class="form-group">
-            <label>⏳ 2. 本日の全スタッフの総労働時間（時間）</label>
-            <input type="number" id="web-hours" placeholder="例: 25 （バイト全員の時間を足した合計）">
-        </div>
-
-        <div class="form-group">
-            <label>🍜 3. お店の想定原価率（％）</label>
-            <input type="number" id="web-cost-rate" value="35" placeholder="一般的な飲食店は30〜35％です">
-        </div>
-        
-        <button class="submit-btn" onclick="calculateProfitAndSend()">🛡️ 利益を自動計算してDiscordへ報告</button>
-        
+        <button class="submit-btn" onclick="executeSystem()">🛡️ データを保存してDiscord＆WEBに反映</button>
         <div id="status-box" class="status-msg"></div>
     </div>
 
+    <!-- 💡 【新パーツ】WEBサイト上にデータを可視化する履歴表示エリア -->
+    <div class="view-container">
+        <div class="form-title" style="border-color: #22c55e; color: #22c55e;"><span>📈 WEB画面上：過去の利益可視化ボード</span></div>
+        <div id="web-history-list">
+            <p style="color: #64748b; font-size: 14px; text-align: center;">過去のデータはまだありません。</p>
+        </div>
+    </div>
+
     <script>
-        function calculateProfitAndSend() {
+        // 画面が開いた瞬間に、倉庫から過去のデータを自動で読み取ってWEBに表示する
+        window.onload = function() {
+            document.getElementById("web-date").valueAsDate = new Date();
+            loadHistory();
+        };
+
+        function executeSystem() {
             let statusBox = document.getElementById("status-box");
             statusBox.style.display = "none";
 
-            // 1. 入力されたデータをすべて読み取る
             let inputPass = document.getElementById("web-pass").value;
+            let dateVal = document.getElementById("web-date").value;
             let todayVal = parseInt(document.getElementById("web-today").value);
             let hoursVal = parseInt(document.getElementById("web-hours").value);
             let costRateVal = parseInt(document.getElementById("web-cost-rate").value);
             
-            // 🛡️ パスワードチェック
             if (inputPass !== "honami20") {
-                statusBox.className = "status-msg error-badge";
-                statusBox.innerText = "❌ 認証エラー: パスワードが違います。";
-                statusBox.style.display = "block";
+                showStatus("❌ 認証エラー: パスワードが違います。", "error-badge");
+                return;
+            }
+            if (!dateVal || isNaN(todayVal) || isNaN(hoursVal) || isNaN(costRateVal) || todayVal < 0 || hoursVal < 0 || costRateVal < 0) {
+                showStatus("❌ 入力エラー: すべての項目を正しく入力してください。", "error-badge");
                 return;
             }
 
-            // 🛡️ 入力エラーのガード
-            if (isNaN(todayVal) || isNaN(hoursVal) || isNaN(costRateVal) || todayVal < 0 || hoursVal < 0 || costRateVal < 0 || costRateVal > 100) {
-                statusBox.className = "status-msg error-badge";
-                statusBox.innerText = "❌ 入力エラー: すべての項目を正しい数字で入力してください。";
-                statusBox.style.display = "block";
-                return;
-            }
-
-            // 💡 【新機能：人件費・原価・純利益のリアル自動計算！】
-            // ① 平均時給を「1,100円」と仮定して、今日の人件費の合計を出す
+            // 💡 【人件費・原価・純利益の自動計算】
             let jinkenhi = hoursVal * 1100;
-
-            // ② 入力された原価率（％）を使って、今日の食材費（原価）を出す
             let genka = Math.floor(todayVal * (costRateVal / 100));
-
-            // ③ 売上から「人件費」と「原価」をすべて引き算して、手元に残る【純利益】を割り出す！
             let netProfit = todayVal - jinkenhi - genka;
-
-            // ④ 売上に対する純利益の割合（利益率％）を出す
             let profitRate = todayVal > 0 ? Math.floor((netProfit / todayVal) * 100) : 0;
 
-            // 💡 【ご要望：AIアドバイスのガチ分析化！】
-            // 手元に残った「利益率の％」をベースに、AIがお店の経営状態を本気で診断します
-            let aiAdvice = "";
-            if (profitRate >= 40) {
-                aiAdvice = "🔥【AI最高評価: 利益爆発】利益率が40%を超える驚異的な超黒字営業です！無駄な人件費を極限まで抑えつつ、最高の効率でお店を回せています。このシフト配置とオペレーションは理想郷です。店長・スタッフ全員を大絶賛してください！";
-            } else if (profitRate >= 20) {
-                aiAdvice = "✨【AI優良評価: 安定黒字】利益率20%〜39%の、非常に健全で素晴らしい黒字運営です。人件費のコントロールと売上のバランスが完璧に噛み合っています。この調子を維持していきましょう！";
-            } else if (profitRate >= 0) {
-                aiAdvice = "⚠️【AI注意報: 薄利営業】手元に利益は残っていますが、利益率が20%未満と少し寂しい状態です。売上に対してスタッフの数が多すぎた（シフトが過剰だった）可能性があります。ピークタイム以外の時間を早上がりにするなど、人件費の微調整を検討してください。";
+            // 💡 【倉庫（Local Storage）から、昨日（前回のデータ）を読みだして「作戦B（前後比較）」を計算！】
+            let savedData = JSON.parse(localStorage.getItem("store_history")) || [];
+            let yesterdayProfit = savedData.length > 0 ? savedData[0].netProfit : netProfit; // 前回データがなければ今日の値で計算
+            
+            let compareText = "";
+            if (savedData.length > 0) {
+                if (yesterdayProfit === 0) yesterdayProfit = 1; // 0の割り算バグ防止
+                let dayPercent = Math.floor((netProfit / yesterdayProfit) * 100);
+                let dayDiff = dayPercent - 100;
+                compareText = dayDiff >= 0 ? `前日利益比：${dayDiff}%アップ 📈` : `前日利益比：${Math.abs(dayDiff)}%ダウン 📉`;
             } else {
-                aiAdvice = "🚨【AI危険信号: 赤字経営】本日の営業は赤字です！売上に対して、人件費（スタッフの労働時間）または原価がかかりすぎています。至急、シフトの組み方を見直すか、廃棄ロス（食材のムダ）が出ていないか明日の営業前に緊急監査を行ってください！";
+                compareText = "前日利益比：新規データ（比較対象なし）";
             }
 
-            // 📊 視覚的な進捗グラフ（残った利益率の大きさに合わせて伸びる！）
-            let starCount = Math.min(Math.max(Math.floor(profitRate / 5), 1), 20);
-            let stars = profitRate >= 0 ? "■".repeat(starCount) : "❌（赤字のためグラフ表示不可）";
+            // AI経営診断コメントの自動生成
+            let aiAdvice = profitRate >= 20 ? "✨【AI優良評価】非常に健全な黒字運営です！人件費の管理が完璧に噛み合っています。" : "⚠️【AI注意報】利益率が目標を下回っています。シフトの配置人数を1名減らすなどの微調整を検討してください。";
 
-            // 3. 企業向けの高度な利益報告フォーマット
-            let message = `\n━━━━━━━━━━━━━━━━━━━━\n🔒 【収支・利益監査】当日純利益アナリティクス\n━━━━━━━━━━━━━━━━━━━━\n📅 報告受付：${new Date().toLocaleString()}\n💰 当日売上：${todayVal.toLocaleString()}円\n⏳ 総労働時：${hoursVal} 時間 (概算人件費: ${jinkenhi.toLocaleString()}円)\n🍜 食材原価：${genka.toLocaleString()}円 (原価率: ${costRateVal}％)\n\n💵 💵 💵 💵 💵 💵 💵 💵 💵\n💵 確定純利益：${netProfit.toLocaleString()}円\n💵 当日利益率：${profitRate}％\n💵 💵 💵 💵 💵 💵 💵 💵 💵\n\n📊 利益グラフ：${stars}\n🧠 経営コンサル助言：\n${aiAdvice}\n━━━━━━━━━━━━━━━━━━━━\n※このデータは社内監査用に自動記録されました。`;
+            // 💡 【倉庫への永久保存機能】今回の最新データを倉庫の一番上に追加して保存！
+            let newLog = { date: dateVal, today: todayVal, hours: hoursVal, netProfit: netProfit, profitRate: profitRate };
+            savedData.unshift(newLog);
+            localStorage.setItem("store_history", JSON.stringify(savedData));
 
-            // 💻 あなたのDiscordのWebhook URLをここにそのまま貼り付けてね！
+            // WEB画面上の履歴表示を即座に更新（可視化）
+            loadHistory();
+
+            // 3. Discord報告フォーマット（作戦Bの比較テキスト付き！）
+            let message = `\n━━━━━━━━━━━━━━━━━━━━\n🔒 【Ver5.0 利益監査】高度アナリティクス報告\n━━━━━━━━━━━━━━━━━━━━\n📅 報告対象日：${dateVal}\n💰 当日総売上：${todayVal.toLocaleString()}円\n⏳ 総労働時間：${hoursVal} 時間 (人件費: ${jinkenhi.toLocaleString()}円)\n📊 利益率判定：${profitRate}％\n⚖️ 利益成長率：${compareText}\n\n💵 💵 💵 💵 💵 💵 💵 💵 💵\n💵 確定純利益：${netProfit.toLocaleString()}円\n💵 💵 💵 💵 💵 💵 💵 💵 💵\n\n🧠 AI経営助言：\n${aiAdvice}\n━━━━━━━━━━━━━━━━━━━━`;
+
+            // 💻 あなたのDiscordのWebhook URLを貼ってね！
             let webhookUrl = "https://discord.com/api/webhooks/1551676045495631892/Tl8plY9cre2lnI5x7HZY-7v9j1TArRl3PIwnUJydY3A61LxTiY8FF3YUgJXxW78V5Anf";
 
-            fetch(webhookUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ content: message })
-            })
+            fetch(webhookUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: message }) })
             .then(response => {
                 if (response.ok) {
-                    statusBox.className = "status-msg success-badge";
-                    statusBox.innerText = "🔒 監査成功: 確定利益データをDiscordへ暗号化送信しました！";
-                    statusBox.style.display = "block";
-                    // 入力欄をクリア
-                    document.getElementById("web-pass").value = "";
+                    showStatus("🔒 監査成功: データを倉庫に永久保存し、Discordへ送信しました！", "success-badge");
                     document.getElementById("web-today").value = "";
                     document.getElementById("web-hours").value = "";
-                } else {
-                    alert("送信失敗。DiscordのURLを確認してください。");
                 }
-            })
-            .catch(error => {
-                statusBox.className = "status-msg error-badge";
-                statusBox.innerText = "❌ 通信エラーが発生しました: " + error;
-                statusBox.style.display = "block";
             });
+        }
+
+        // 💡 倉庫からデータを引っ張ってきて、WEB画面上に綺麗に可視化（表を作成）するプロのプログラム
+        function loadHistory() {
+            let savedData = JSON.parse(localStorage.getItem("store_history")) || [];
+            let historyArea = document.getElementById("web-history-list");
+            if (savedData.length === 0) return;
+
+            historyArea.innerHTML = ""; // 一回お掃除
+            savedData.forEach(log => {
+                let html = `
+                    <div class="history-item">
+                        <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                            <span>📅 ${log.date}</span>
+                            <span class="history-profit">確定利益: ¥${log.netProfit.toLocaleString()} (${log.profitRate}%)</span>
+                        </div>
+                        <div class="history-grid">
+                            <span>💰 売上: ¥${log.today.toLocaleString()}</span>
+                            <span>⏳ 労働: ${log.hours}時間</span>
+                        </div>
+                    </div>
+                `;
+                historyArea.innerHTML += html;
+            });
+        }
+
+        function showStatus(text, badgeClass) {
+            let statusBox = document.getElementById("status-box");
+            statusBox.className = "status-msg " + badgeClass;
+            statusBox.innerText = text;
+            statusBox.style.display = "block";
         }
     </script>
 </body>
 </html>
+
