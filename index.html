@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>【企業向ガチ仕様】店舗売上・セキュリティ送信システム</title>
+    <title>【ガチ経営分析】店舗売上・高度アナリティクスシステム</title>
     <style>
-        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; padding-bottom: 60px; text-align: center; }
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b0f19; color: #f8fafc; padding-bottom: 60px; text-align: center; }
         header { background: #1e293b; padding: 18px; border-bottom: 1px solid #334155; font-weight: bold; color: #38bdf8; font-size: 20px; letter-spacing: 1px; }
         .hero { padding: 40px 20px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
         .form-container { max-width: 480px; margin: 30px auto; background: #1e293b; padding: 30px; border-radius: 12px; border: 1px solid #334155; text-align: left; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); }
@@ -23,49 +23,57 @@
 </head>
 <body>
 
-    <header>🛡️ ENTERPRISE SECURITY SYSTEM</header>
+    <header>🛡️ ENTERPRISE ANALYTICS SYSTEM</header>
 
     <div class="hero">
-        <h1>📊 本格社内用：売上データ報告フォーム</h1>
-        <p>※この画面はセキュリティで保護されています。正しい認証パスワードが必要です。</p>
+        <h1>📊 高度社内用：売上成長率・分析アナリティクス</h1>
+        <p>※前日データ・前月比を自動計算し、AIが経営アドバイスをガチ分析します。</p>
     </div>
 
     <div class="form-container">
         <div class="form-title">
-            <span>📝 本日の売上監査入力</span>
-            <span style="font-size: 12px; color: #94a3b8;">Ver 2.0</span>
+            <span>📝 本日の売上データ監査</span>
+            <span style="font-size: 12px; color: #94a3b8;">Ver 3.0</span>
         </div>
         
+        <!-- パスワード機能はそのまま維持！ -->
         <div class="form-group">
             <label>🔑 管理者認証パスワード（必須）</label>
             <input type="password" id="web-pass" placeholder="社内共通パスワードを入力">
         </div>
 
+        <!-- 💡 データの信憑性を上げるための「確実な売上3項目」の入力欄 -->
         <div class="form-group">
-            <label>💰 当日売上金額（半角数字のみ）</label>
-            <input type="number" id="web-uriage" placeholder="例: 180000">
+            <label>💰 1. 本日の売上金額（円）</label>
+            <input type="number" id="web-today" placeholder="例: 180000">
         </div>
         
         <div class="form-group">
-            <label>👥 当日来店客数（半角数字のみ）</label>
-            <input type="number" id="web-kyaku" placeholder="例: 100">
+            <label>📉 2. 前日の売上金額（円）</label>
+            <input type="number" id="web-yesterday" placeholder="例: 150000">
+        </div>
+
+        <div class="form-group">
+            <label>📅 3. 先月の月間総売上（円）</label>
+            <input type="number" id="web-lastmonth" placeholder="例: 4500000">
         </div>
         
-        <button class="submit-btn" onclick="secureSendToDiscord()">🛡️ セキュリティ暗号化してDiscordへ報告</button>
+        <button class="submit-btn" onclick="analyzeAndSend()">🛡️ 売上をガチ分析してDiscordへ報告</button>
         
         <div id="status-box" class="status-msg"></div>
     </div>
 
     <script>
-        function secureSendToDiscord() {
+        function analyzeAndSend() {
             let statusBox = document.getElementById("status-box");
             statusBox.style.display = "none";
 
             let inputPass = document.getElementById("web-pass").value;
-            let uriage = parseInt(document.getElementById("web-uriage").value);
-            let kyaku = parseInt(document.getElementById("web-kyaku").value);
+            let todayVal = parseInt(document.getElementById("web-today").value);
+            let yesterdayVal = parseInt(document.getElementById("web-yesterday").value);
+            let lastMonthVal = parseInt(document.getElementById("web-lastmonth").value);
             
-            // 🛡️ パスワード認証チェック（大文字小文字を正しく打ってね！）
+            // 🛡️ パスワードチェック
             if (inputPass !== "honami20") {
                 statusBox.className = "status-msg error-badge";
                 statusBox.innerText = "❌ 認証エラー: パスワードが違います。";
@@ -73,31 +81,49 @@
                 return;
             }
 
-            // 🛡️ 割り算バグなどを100%防ぐエラーチェック
-            if (isNaN(uriage) || isNaN(kyaku) || uriage < 0 || kyaku <= 0) {
+            // 🛡️ 入力エラーのガード
+            if (isNaN(todayVal) || isNaN(yesterdayVal) || isNaN(lastMonthVal) || todayVal < 0 || yesterdayVal <= 0 || lastMonthVal <= 0) {
                 statusBox.className = "status-msg error-badge";
-                statusBox.innerText = "❌ 入力エラー: 正しい数値を入力してください。";
+                statusBox.innerText = "❌ 入力エラー: すべての売上を正しい数字で入力してください。";
                 statusBox.style.display = "block";
                 return;
             }
 
-            let tanka = Math.floor(uriage / kyaku);
-            
-            // 💡 スペルのエラー（バグ）を完全に修正しました！
-            let starCount = Math.min(Math.floor(uriage / 10000), 20);
-            let stars = "■".repeat(starCount);
+            // 💡 【新機能：前日比・前月比％の自動計算】
+            // 今日の売上が、前日や先月平均（30日分割）と比べて何％アップ・ダウンしたかを計算
+            let dayPercent = Math.floor((todayVal / yesterdayVal) * 100);
+            let dayDiff = dayPercent - 100;
+            let dayResultText = dayDiff >= 0 ? `前日比：${dayDiff}%アップ 📈` : `前日比：${Math.abs(dayDiff)}%ダウン 📉`;
 
+            let lastMonthDayAvg = lastMonthVal / 30; // 先月の1日平均売上
+            let monthPercent = Math.floor((todayVal / lastMonthDayAvg) * 100);
+            let monthDiff = monthPercent - 100;
+            let monthResultText = monthDiff >= 0 ? `先月平均比：${monthDiff}%アップ 📈` : `先月平均比：${Math.abs(monthDiff)}%ダウン 📉`;
+
+            // 💡 【ご要望：AIアドバイスのガチ分析化！】
+            // 同じコメントばかりにならないよう、前日比と前月比の「組み合わせパターン」で詳細に分岐させました！
             let aiAdvice = "";
-            if (tanka < 1500) {
-                aiAdvice = "【AI経営分析】客単価が目標値（1,500円）を下回っています。セットメニューのご案内を強化してください。";
+            if (dayDiff >= 10 && monthDiff >= 10) {
+                aiAdvice = "🔥【AI超高評価】前日比・先月比ともに10%以上プラスの大躍進です！今日行った販促や、おすすめメニューの提案が完全に客層にハマっています。この成功パターンをマニュアル化し、チーム全員に即共有してください！";
+            } else if (dayDiff >= 0 && monthDiff >= 0) {
+                aiAdvice = "✨【AI安定評価】前日・先月平均をしっかり上回り、非常に健全な売上推移です。大きなトラブルもなく、安定した店舗運営ができています。リピーターをより強固にするため、次回使えるクーポンのアプローチを続けましょう。";
+            } else if (dayDiff < 0 && monthDiff >= 0) {
+                aiAdvice = "⚠️【AI注意報】先月平均のペースは維持していますが、前日より売上が下がっています。曜日ごとの波、または天候の影響が考えられます。客単価を補うための『あと1品』のおすすめセット提案を意識してください。";
+            } else if (dayDiff >= 0 && monthDiff < 0) {
+                aiAdvice = "📊【AIリカバリー評価】前日からは見事に売上を回復させましたが、先月平均のペースにはまだ届いていません。全体の来客基盤が少し弱まっている可能性があるため、SNS発信や看板メニューの露出を増やして新規開拓を狙いましょう。";
             } else {
-                aiAdvice = "【AI経営分析】目標単価を達成しています！現在の接客クオリティを維持してください。";
+                aiAdvice = "🚨【AI警告】前日比・先月比ともに減少する危険信号です。速やかに今日の『時間帯別の売上動向』を確認してください。ピークタイムの取りこぼしがなかったか、ロスが出ていないか、明日の営業前に緊急で見直しが必要です。";
             }
 
-            let message = `\n━━━━━━━━━━━━━━━━━━━━\n🔒 【セキュリティ認証済】店舗売上報告データ\n━━━━━━━━━━━━━━━━━━━━\n📅 報告受付：${new Date().toLocaleString()}\n💰 総売上金：${uriage.toLocaleString()}円\n👥 来店客数：${kyaku}人\n🎯 監査単価：${tanka.toLocaleString()}円\n📊 視覚情報：📊 ${stars}\n🤖 経営助言：${aiAdvice}\n━━━━━━━━━━━━━━━━━━━━\n※このデータは社内監査用に自動記録されました。`;
+            // 📊 視覚的な進捗グラフ（前日比の％の大きさに合わせて伸びる！）
+            let starCount = Math.min(Math.max(Math.floor(dayPercent / 10), 1), 20);
+            let stars = "■".repeat(starCount);
+
+            // 3. 企業向けの高度なDiscord報告フォーマット
+            let message = `\n━━━━━━━━━━━━━━━━━━━━\n🔒 【高度売上監査】前日・前月比アナリティクス\n━━━━━━━━━━━━━━━━━━━━\n📅 報告受付：${new Date().toLocaleString()}\n💰 当日売上：${todayVal.toLocaleString()}円\n📊 日次判定：${dayResultText} (${dayPercent}%)\n月次判定：${monthResultText} (${monthPercent}%)\n📈 成長推移：📊 ${stars}\n🧠 経営コンサル助言：\n${aiAdvice}\n━━━━━━━━━━━━━━━━━━━━\n※このデータは社内監査用に自動記録されました。`;
 
             // 💻 あなたのDiscordのWebhook URLをここにそのまま貼り付けてね！
-            let webhookUrl = "https://discord.com/api/webhooks/1551687549322268852/61jhFLC1palCQbfD6QuBhxFiXoYK1xBv-KQC-1WAg8_EaHN-ehHwZvenYVKq2wvGLN7h";
+            let webhookUrl = "https://discord.com";
 
             fetch(webhookUrl, {
                 method: "POST",
@@ -107,11 +133,13 @@
             .then(response => {
                 if (response.ok) {
                     statusBox.className = "status-msg success-badge";
-                    statusBox.innerText = "🔒 監査送信成功: Discordへ送信しました！";
+                    statusBox.innerText = "🔒 送信成功: 高度分析データをDiscordへ送信しました！";
                     statusBox.style.display = "block";
+                    // 入力欄をクリア
                     document.getElementById("web-pass").value = "";
-                    document.getElementById("web-uriage").value = "";
-                    document.getElementById("web-kyaku").value = "";
+                    document.getElementById("web-today").value = "";
+                    document.getElementById("web-yesterday").value = "";
+                    document.getElementById("web-lastmonth").value = "";
                 } else {
                     alert("送信失敗。DiscordのURLを確認してください。");
                 }
