@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>【ガチ経営分析】店舗売上・高度アナリティクスシステム</title>
+    <title>【利益監査】店舗利益・人件費アナリティクスシステム</title>
     <style>
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b0f19; color: #f8fafc; padding-bottom: 60px; text-align: center; }
         header { background: #1e293b; padding: 18px; border-bottom: 1px solid #334155; font-weight: bold; color: #38bdf8; font-size: 20px; letter-spacing: 1px; }
@@ -23,55 +23,56 @@
 </head>
 <body>
 
-    <header>🛡️ ENTERPRISE ANALYTICS SYSTEM</header>
+    <header>🛡️ ENTERPRISE PROFIT AUDIT SYSTEM</header>
 
     <div class="hero">
-        <h1>📊 高度社内用：売上成長率・分析アナリティクス</h1>
-        <p>※前日データ・前月比を自動計算し、AIが経営アドバイスをガチ分析します。</p>
+        <h1>📊 本格社内用：当日利益・人件費監査フォーム</h1>
+        <p>※売上と総労働時間を入力するだけで、人件費・原価を引き算し、手元に残る【純利益】をAIがガチ分析します。</p>
     </div>
 
     <div class="form-container">
         <div class="form-title">
-            <span>📝 本日の売上データ監査</span>
-            <span style="font-size: 12px; color: #94a3b8;">Ver 3.0</span>
+            <span>📝 本日の収支監査入力</span>
+            <span style="font-size: 12px; color: #94a3b8;">Ver 4.0</span>
         </div>
         
-        <!-- パスワード機能はそのまま維持！ -->
+        <!-- パスワード機能 -->
         <div class="form-group">
             <label>🔑 管理者認証パスワード（必須）</label>
             <input type="password" id="web-pass" placeholder="社内共通パスワードを入力">
         </div>
 
-        <!-- 💡 データの信憑性を上げるための「確実な売上3項目」の入力欄 -->
+        <!-- 💡 利益を一発計算するための3つのリアル入力欄 -->
         <div class="form-group">
-            <label>💰 1. 本日の売上金額（円）</label>
+            <label>💰 1. 本日の総売上金額（円）</label>
             <input type="number" id="web-today" placeholder="例: 180000">
         </div>
         
         <div class="form-group">
-            <label>📉 2. 前日の売上金額（円）</label>
-            <input type="number" id="web-yesterday" placeholder="例: 150000">
+            <label>⏳ 2. 本日の全スタッフの総労働時間（時間）</label>
+            <input type="number" id="web-hours" placeholder="例: 25 （バイト全員の時間を足した合計）">
         </div>
 
         <div class="form-group">
-            <label>📅 3. 先月の月間総売上（円）</label>
-            <input type="number" id="web-lastmonth" placeholder="例: 4500000">
+            <label>🍜 3. お店の想定原価率（％）</label>
+            <input type="number" id="web-cost-rate" value="35" placeholder="一般的な飲食店は30〜35％です">
         </div>
         
-        <button class="submit-btn" onclick="analyzeAndSend()">🛡️ 売上をガチ分析してDiscordへ報告</button>
+        <button class="submit-btn" onclick="calculateProfitAndSend()">🛡️ 利益を自動計算してDiscordへ報告</button>
         
         <div id="status-box" class="status-msg"></div>
     </div>
 
     <script>
-        function analyzeAndSend() {
+        function calculateProfitAndSend() {
             let statusBox = document.getElementById("status-box");
             statusBox.style.display = "none";
 
+            // 1. 入力されたデータをすべて読み取る
             let inputPass = document.getElementById("web-pass").value;
             let todayVal = parseInt(document.getElementById("web-today").value);
-            let yesterdayVal = parseInt(document.getElementById("web-yesterday").value);
-            let lastMonthVal = parseInt(document.getElementById("web-lastmonth").value);
+            let hoursVal = parseInt(document.getElementById("web-hours").value);
+            let costRateVal = parseInt(document.getElementById("web-cost-rate").value);
             
             // 🛡️ パスワードチェック
             if (inputPass !== "honami20") {
@@ -82,45 +83,45 @@
             }
 
             // 🛡️ 入力エラーのガード
-            if (isNaN(todayVal) || isNaN(yesterdayVal) || isNaN(lastMonthVal) || todayVal < 0 || yesterdayVal <= 0 || lastMonthVal <= 0) {
+            if (isNaN(todayVal) || isNaN(hoursVal) || isNaN(costRateVal) || todayVal < 0 || hoursVal < 0 || costRateVal < 0 || costRateVal > 100) {
                 statusBox.className = "status-msg error-badge";
-                statusBox.innerText = "❌ 入力エラー: すべての売上を正しい数字で入力してください。";
+                statusBox.innerText = "❌ 入力エラー: すべての項目を正しい数字で入力してください。";
                 statusBox.style.display = "block";
                 return;
             }
 
-            // 💡 【新機能：前日比・前月比％の自動計算】
-            // 今日の売上が、前日や先月平均（30日分割）と比べて何％アップ・ダウンしたかを計算
-            let dayPercent = Math.floor((todayVal / yesterdayVal) * 100);
-            let dayDiff = dayPercent - 100;
-            let dayResultText = dayDiff >= 0 ? `前日比：${dayDiff}%アップ 📈` : `前日比：${Math.abs(dayDiff)}%ダウン 📉`;
+            // 💡 【新機能：人件費・原価・純利益のリアル自動計算！】
+            // ① 平均時給を「1,100円」と仮定して、今日の人件費の合計を出す
+            let jinkenhi = hoursVal * 1100;
 
-            let lastMonthDayAvg = lastMonthVal / 30; // 先月の1日平均売上
-            let monthPercent = Math.floor((todayVal / lastMonthDayAvg) * 100);
-            let monthDiff = monthPercent - 100;
-            let monthResultText = monthDiff >= 0 ? `先月平均比：${monthDiff}%アップ 📈` : `先月平均比：${Math.abs(monthDiff)}%ダウン 📉`;
+            // ② 入力された原価率（％）を使って、今日の食材費（原価）を出す
+            let genka = Math.floor(todayVal * (costRateVal / 100));
+
+            // ③ 売上から「人件費」と「原価」をすべて引き算して、手元に残る【純利益】を割り出す！
+            let netProfit = todayVal - jinkenhi - genka;
+
+            // ④ 売上に対する純利益の割合（利益率％）を出す
+            let profitRate = todayVal > 0 ? Math.floor((netProfit / todayVal) * 100) : 0;
 
             // 💡 【ご要望：AIアドバイスのガチ分析化！】
-            // 同じコメントばかりにならないよう、前日比と前月比の「組み合わせパターン」で詳細に分岐させました！
+            // 手元に残った「利益率の％」をベースに、AIがお店の経営状態を本気で診断します
             let aiAdvice = "";
-            if (dayDiff >= 10 && monthDiff >= 10) {
-                aiAdvice = "🔥【AI超高評価】前日比・先月比ともに10%以上プラスの大躍進です！今日行った販促や、おすすめメニューの提案が完全に客層にハマっています。この成功パターンをマニュアル化し、チーム全員に即共有してください！";
-            } else if (dayDiff >= 0 && monthDiff >= 0) {
-                aiAdvice = "✨【AI安定評価】前日・先月平均をしっかり上回り、非常に健全な売上推移です。大きなトラブルもなく、安定した店舗運営ができています。リピーターをより強固にするため、次回使えるクーポンのアプローチを続けましょう。";
-            } else if (dayDiff < 0 && monthDiff >= 0) {
-                aiAdvice = "⚠️【AI注意報】先月平均のペースは維持していますが、前日より売上が下がっています。曜日ごとの波、または天候の影響が考えられます。客単価を補うための『あと1品』のおすすめセット提案を意識してください。";
-            } else if (dayDiff >= 0 && monthDiff < 0) {
-                aiAdvice = "📊【AIリカバリー評価】前日からは見事に売上を回復させましたが、先月平均のペースにはまだ届いていません。全体の来客基盤が少し弱まっている可能性があるため、SNS発信や看板メニューの露出を増やして新規開拓を狙いましょう。";
+            if (profitRate >= 40) {
+                aiAdvice = "🔥【AI最高評価: 利益爆発】利益率が40%を超える驚異的な超黒字営業です！無駄な人件費を極限まで抑えつつ、最高の効率でお店を回せています。このシフト配置とオペレーションは理想郷です。店長・スタッフ全員を大絶賛してください！";
+            } else if (profitRate >= 20) {
+                aiAdvice = "✨【AI優良評価: 安定黒字】利益率20%〜39%の、非常に健全で素晴らしい黒字運営です。人件費のコントロールと売上のバランスが完璧に噛み合っています。この調子を維持していきましょう！";
+            } else if (profitRate >= 0) {
+                aiAdvice = "⚠️【AI注意報: 薄利営業】手元に利益は残っていますが、利益率が20%未満と少し寂しい状態です。売上に対してスタッフの数が多すぎた（シフトが過剰だった）可能性があります。ピークタイム以外の時間を早上がりにするなど、人件費の微調整を検討してください。";
             } else {
-                aiAdvice = "🚨【AI警告】前日比・先月比ともに減少する危険信号です。速やかに今日の『時間帯別の売上動向』を確認してください。ピークタイムの取りこぼしがなかったか、ロスが出ていないか、明日の営業前に緊急で見直しが必要です。";
+                aiAdvice = "🚨【AI危険信号: 赤字経営】本日の営業は赤字です！売上に対して、人件費（スタッフの労働時間）または原価がかかりすぎています。至急、シフトの組み方を見直すか、廃棄ロス（食材のムダ）が出ていないか明日の営業前に緊急監査を行ってください！";
             }
 
-            // 📊 視覚的な進捗グラフ（前日比の％の大きさに合わせて伸びる！）
-            let starCount = Math.min(Math.max(Math.floor(dayPercent / 10), 1), 20);
-            let stars = "■".repeat(starCount);
+            // 📊 視覚的な進捗グラフ（残った利益率の大きさに合わせて伸びる！）
+            let starCount = Math.min(Math.max(Math.floor(profitRate / 5), 1), 20);
+            let stars = profitRate >= 0 ? "■".repeat(starCount) : "❌（赤字のためグラフ表示不可）";
 
-            // 3. 企業向けの高度なDiscord報告フォーマット
-            let message = `\n━━━━━━━━━━━━━━━━━━━━\n🔒 【高度売上監査】前日・前月比アナリティクス\n━━━━━━━━━━━━━━━━━━━━\n📅 報告受付：${new Date().toLocaleString()}\n💰 当日売上：${todayVal.toLocaleString()}円\n📊 日次判定：${dayResultText} (${dayPercent}%)\n月次判定：${monthResultText} (${monthPercent}%)\n📈 成長推移：📊 ${stars}\n🧠 経営コンサル助言：\n${aiAdvice}\n━━━━━━━━━━━━━━━━━━━━\n※このデータは社内監査用に自動記録されました。`;
+            // 3. 企業向けの高度な利益報告フォーマット
+            let message = `\n━━━━━━━━━━━━━━━━━━━━\n🔒 【収支・利益監査】当日純利益アナリティクス\n━━━━━━━━━━━━━━━━━━━━\n📅 報告受付：${new Date().toLocaleString()}\n💰 当日売上：${todayVal.toLocaleString()}円\n⏳ 総労働時：${hoursVal} 時間 (概算人件費: ${jinkenhi.toLocaleString()}円)\n🍜 食材原価：${genka.toLocaleString()}円 (原価率: ${costRateVal}％)\n\n💵 💵 💵 💵 💵 💵 💵 💵 💵\n💵 確定純利益：${netProfit.toLocaleString()}円\n💵 当日利益率：${profitRate}％\n💵 💵 💵 💵 💵 💵 💵 💵 💵\n\n📊 利益グラフ：${stars}\n🧠 経営コンサル助言：\n${aiAdvice}\n━━━━━━━━━━━━━━━━━━━━\n※このデータは社内監査用に自動記録されました。`;
 
             // 💻 あなたのDiscordのWebhook URLをここにそのまま貼り付けてね！
             let webhookUrl = "https://discord.com/api/webhooks/1551676045495631892/Tl8plY9cre2lnI5x7HZY-7v9j1TArRl3PIwnUJydY3A61LxTiY8FF3YUgJXxW78V5Anf";
@@ -133,13 +134,12 @@
             .then(response => {
                 if (response.ok) {
                     statusBox.className = "status-msg success-badge";
-                    statusBox.innerText = "🔒 送信成功: 高度分析データをDiscordへ送信しました！";
+                    statusBox.innerText = "🔒 監査成功: 確定利益データをDiscordへ暗号化送信しました！";
                     statusBox.style.display = "block";
                     // 入力欄をクリア
                     document.getElementById("web-pass").value = "";
                     document.getElementById("web-today").value = "";
-                    document.getElementById("web-yesterday").value = "";
-                    document.getElementById("web-lastmonth").value = "";
+                    document.getElementById("web-hours").value = "";
                 } else {
                     alert("送信失敗。DiscordのURLを確認してください。");
                 }
@@ -153,5 +153,3 @@
     </script>
 </body>
 </html>
-
-
