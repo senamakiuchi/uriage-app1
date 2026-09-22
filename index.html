@@ -123,7 +123,7 @@
             let message = `\n━━━━━━━━━━━━━━━━━━━━\n🔒 【高度売上監査】前日・前月比アナリティクス\n━━━━━━━━━━━━━━━━━━━━\n📅 報告受付：${new Date().toLocaleString()}\n💰 当日売上：${todayVal.toLocaleString()}円\n📊 日次判定：${dayResultText} (${dayPercent}%)\n月次判定：${monthResultText} (${monthPercent}%)\n📈 成長推移：📊 ${stars}\n🧠 経営コンサル助言：\n${aiAdvice}\n━━━━━━━━━━━━━━━━━━━━\n※このデータは社内監査用に自動記録されました。`;
 
             // 💻 あなたのDiscordのWebhook URLをここにそのまま貼り付けてね！
-            let webhookUrl = "https://discord.com";
+            let webhookUrl = "https://discord.com/api/webhooks/1551676045495631892/Tl8plY9cre2lnI5x7HZY-7v9j1TArRl3PIwnUJydY3A61LxTiY8FF3YUgJXxW78V5Anf";
 
             fetch(webhookUrl, {
                 method: "POST",
